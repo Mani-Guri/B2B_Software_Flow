@@ -153,24 +153,23 @@
             overflow: auto;
             background: #f8fafc;
             max-height: 800px;
+            padding: 20px;
         }
 
         .mermaid {
             text-align: center;
-            padding: 40px;
-            min-width: 1200px;
+            min-width: 1000px;
             transition: transform 0.3s ease;
+            margin: 0 auto;
         }
 
         .diagram-controls {
-            position: sticky;
+            position: absolute;
             top: 10px;
             right: 10px;
             display: flex;
             gap: 10px;
             z-index: 100;
-            float: right;
-            margin-bottom: 10px;
         }
 
         .control-btn {
@@ -195,14 +194,12 @@
         }
 
         .zoom-controls {
-            position: sticky;
+            position: absolute;
             bottom: 10px;
             right: 10px;
             display: flex;
             gap: 5px;
             z-index: 100;
-            float: right;
-            margin-top: 10px;
         }
 
         .zoom-btn {
@@ -229,7 +226,8 @@
         }
 
         /* Fullscreen styles */
-        .fullscreen-mode {
+        #fullscreenOverlay {
+            display: none;
             position: fixed;
             top: 0;
             left: 0;
@@ -240,27 +238,38 @@
             overflow: auto;
         }
 
-        .fullscreen-mode .diagram-container {
+        #fullscreenOverlay.active {
+            display: block;
+        }
+
+        #fullscreenOverlay .diagram-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
             border: none;
             border-radius: 0;
             max-height: none;
-            height: 100vh;
             margin: 0;
+            padding: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        .fullscreen-mode .mermaid {
-            padding: 60px;
-            transform: scale(1.1);
-            transform-origin: top left;
+        #fullscreenOverlay .mermaid {
+            transform: scale(1.2);
+            transform-origin: center;
         }
 
-        .fullscreen-mode .diagram-controls {
+        #fullscreenOverlay .diagram-controls {
             position: fixed;
             top: 20px;
             right: 20px;
         }
 
-        .fullscreen-mode .zoom-controls {
+        #fullscreenOverlay .zoom-controls {
             position: fixed;
             bottom: 20px;
             right: 20px;
@@ -288,6 +297,7 @@
             border-radius: 25px;
             font-size: 0.9rem;
             animation: bounce 2s infinite;
+            z-index: 50;
         }
 
         @keyframes bounce {
@@ -442,7 +452,10 @@
             
             .mermaid {
                 min-width: 800px;
-                padding: 20px;
+            }
+            
+            .diagram-container {
+                padding: 10px;
             }
         }
     </style>
@@ -469,7 +482,7 @@
                         <ul>
                             <li>Uses PAN-Aadhaar linking</li>
                             <li>Auto-fills personal details</li>
-                            <li>Higher security & trust</li>
+                            <!-- <li>Higher security & trust</li> -->
                             <li>Fields locked after verification</li>
                         </ul>
                     </div>
@@ -479,7 +492,7 @@
                         <ul>
                             <li>Manual data entry</li>
                             <li>Used when APIs fail</li>
-                            <li>Requires post-verification</li>
+                            <!-- <li>Requires post-verification</li> -->
                             <li>All fields remain editable</li>
                         </ul>
                     </div>
@@ -543,6 +556,7 @@
                 <h2>Process Flow Diagram</h2>
                 <p>The following diagram illustrates the complete retailer onboarding workflow with all decision points, validations, and exception handling:</p>
                 
+                <!-- Main Diagram Container -->
                 <div class="diagram-container" id="diagramContainer">
                     <div class="diagram-controls">
                         <button class="control-btn" onclick="toggleFullscreen()">
@@ -696,12 +710,31 @@ flowchart TD
     APIMessage --> End4[⏸️ Process Paused]:::manual
                     </div>
                 </div>
+
+                <!-- Fullscreen Overlay (hidden by default) -->
+                <div id="fullscreenOverlay">
+                    <div class="diagram-controls">
+                        <button class="control-btn close-fullscreen" onclick="toggleFullscreen()">
+                            <span>✕</span> Exit Fullscreen
+                        </button>
+                    </div>
+                    
+                    <div class="zoom-controls">
+                        <button class="zoom-btn" onclick="zoomOut()">-</button>
+                        <button class="zoom-btn" onclick="resetZoom()">⟳</button>
+                        <button class="zoom-btn" onclick="zoomIn()">+</button>
+                    </div>
+                    
+                    <div class="mermaid" id="fullscreenDiagram">
+                        <!-- Fullscreen diagram will be cloned here -->
+                    </div>
+                </div>
                 
                 <div class="flow-section">
                     <h3>Diagram Controls</h3>
                     <p>Use the controls above the diagram to:</p>
                     <ul>
-                        <li><strong>Full Screen:</strong> Expand the diagram to full screen starting from the beginning</li>
+                        <li><strong>Full Screen:</strong> Expand the diagram to full screen for better visibility</li>
                         <li><strong>Zoom In/Out:</strong> Use + and - buttons to adjust the zoom level</li>
                         <li><strong>Reset Zoom:</strong> Click the reset button to return to default zoom</li>
                         <li><strong>Scroll:</strong> Use scroll bars to navigate through the complete flowchart</li>
@@ -734,7 +767,7 @@ flowchart TD
         </div>
         
         <footer>
-            <p>Retailer Onboarding Process Documentation | System Administration Guide | Updated with Enhanced Aadhaar Validation</p>
+            <p>Retailer Onboarding Process Documentation | System Administration Guide </p>
         </footer>
     </div>
 
@@ -754,7 +787,9 @@ flowchart TD
         // Zoom functionality
         let currentScale = 1;
         const diagram = document.getElementById('mainDiagram');
+        const fullscreenDiagram = document.getElementById('fullscreenDiagram');
         const diagramContainer = document.getElementById('diagramContainer');
+        const fullscreenOverlay = document.getElementById('fullscreenOverlay');
         const scrollHint = document.getElementById('scrollHint');
 
         function zoomIn() {
@@ -774,20 +809,23 @@ flowchart TD
         function resetZoom() {
             currentScale = 1;
             updateZoom();
-            // Scroll to top-left to show the start of the diagram
-            diagramContainer.scrollTo(0, 0);
+            // Scroll to top to show the start of the diagram
+            if (fullscreenOverlay.classList.contains('active')) {
+                fullscreenOverlay.scrollTo(0, 0);
+            } else {
+                diagramContainer.scrollTo(0, 0);
+            }
         }
 
         function updateZoom() {
-            diagram.style.transform = `scale(${currentScale})`;
-            diagram.style.transformOrigin = '0 0';
+            const targetDiagram = fullscreenOverlay.classList.contains('active') ? fullscreenDiagram : diagram;
+            targetDiagram.style.transform = `scale(${currentScale})`;
+            targetDiagram.style.transformOrigin = 'center center';
         }
 
         // Fullscreen functionality
-        let isFullscreen = false;
-
         function toggleFullscreen() {
-            if (!isFullscreen) {
+            if (!fullscreenOverlay.classList.contains('active')) {
                 enterFullscreen();
             } else {
                 exitFullscreen();
@@ -795,19 +833,13 @@ flowchart TD
         }
 
         function enterFullscreen() {
-            const container = document.querySelector('.flow-card');
-            const originalParent = diagramContainer.parentNode;
+            // Clone the diagram content to fullscreen overlay
+            fullscreenDiagram.innerHTML = diagram.innerHTML;
             
-            // Create fullscreen overlay
-            const fullscreenOverlay = document.createElement('div');
-            fullscreenOverlay.className = 'fullscreen-mode';
-            fullscreenOverlay.id = 'fullscreenOverlay';
+            // Show fullscreen overlay
+            fullscreenOverlay.classList.add('active');
             
-            // Move diagram container to fullscreen overlay
-            fullscreenOverlay.appendChild(diagramContainer);
-            document.body.appendChild(fullscreenOverlay);
-            
-            // Update controls
+            // Update button text
             const fullscreenBtn = document.querySelector('.control-btn');
             fullscreenBtn.innerHTML = '<span>✕</span> Exit Fullscreen';
             fullscreenBtn.classList.add('close-fullscreen');
@@ -815,27 +847,19 @@ flowchart TD
             // Show scroll hint
             scrollHint.style.display = 'block';
             
-            // Reset zoom and scroll to start
+            // Reset zoom and scroll to top
             resetZoom();
-            diagramContainer.scrollTo(0, 0);
-            
-            isFullscreen = true;
+            fullscreenOverlay.scrollTo(0, 0);
             
             // Add keyboard event listener for escape
             document.addEventListener('keydown', handleFullscreenKeydown);
         }
 
         function exitFullscreen() {
-            const fullscreenOverlay = document.getElementById('fullscreenOverlay');
-            const flowCard = document.querySelector('.flow-card');
+            // Hide fullscreen overlay
+            fullscreenOverlay.classList.remove('active');
             
-            if (fullscreenOverlay) {
-                // Move diagram container back to original position
-                flowCard.insertBefore(diagramContainer, flowCard.querySelector('.flow-section'));
-                document.body.removeChild(fullscreenOverlay);
-            }
-            
-            // Update controls
+            // Update button text
             const fullscreenBtn = document.querySelector('.control-btn');
             fullscreenBtn.innerHTML = '<span>⛶</span> Full Screen';
             fullscreenBtn.classList.remove('close-fullscreen');
@@ -846,14 +870,12 @@ flowchart TD
             // Reset zoom
             resetZoom();
             
-            isFullscreen = false;
-            
             // Remove keyboard event listener
             document.removeEventListener('keydown', handleFullscreenKeydown);
         }
 
         function handleFullscreenKeydown(e) {
-            if (e.key === 'Escape' && isFullscreen) {
+            if (e.key === 'Escape' && fullscreenOverlay.classList.contains('active')) {
                 exitFullscreen();
             }
         }
@@ -889,9 +911,11 @@ flowchart TD
             }
         });
 
-        // Initialize diagram scroll position to start
+        // Initialize diagram
         window.addEventListener('load', function() {
             diagramContainer.scrollTo(0, 0);
+            // Re-initialize mermaid for the main diagram
+            mermaid.init(undefined, document.querySelectorAll('#mainDiagram'));
         });
     </script>
 </body>
