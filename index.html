@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retailer Onboarding Process Flow</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 30px 0;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 800px;
+        }
+
+        .content-section {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .summary-card {
+            flex: 1;
+            min-width: 300px;
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .flow-card {
+            flex: 2;
+            min-width: 300px;
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        h2 {
+            color: #1e3c72;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eaeaea;
+            font-weight: 600;
+        }
+
+        h3 {
+            color: #2a5298;
+            margin: 20px 0 10px;
+            font-weight: 600;
+        }
+
+        p {
+            margin-bottom: 15px;
+        }
+
+        ul {
+            padding-left: 20px;
+            margin-bottom: 20px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        .status-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .status-table th, .status-table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+
+        .status-table th {
+            background-color: #f2f6fc;
+            color: #1e3c72;
+            font-weight: 600;
+        }
+
+        .status-table tr:nth-child(even) {
+            background-color: #f9fafc;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .verified {
+            background-color: #e7f6ec;
+            color: #0a7146;
+        }
+
+        .not-verified {
+            background-color: #fef3e2;
+            color: #b54708;
+        }
+
+        .mermaid {
+            text-align: center;
+            margin: 20px 0;
+            overflow-x: auto;
+        }
+
+        .note-box {
+            background-color: #f0f7ff;
+            border-left: 4px solid #2a5298;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .key-points {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 25px 0;
+        }
+
+        .point-card {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 8px;
+            border-top: 4px solid #2a5298;
+        }
+
+        .point-card h4 {
+            color: #1e3c72;
+            margin-bottom: 10px;
+        }
+
+        .flow-section {
+            margin: 25px 0;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 8px;
+        }
+
+        .flow-section h3 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .flow-section h3::before {
+            content: "➤";
+            color: #2a5298;
+        }
+
+        .path-comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 25px 0;
+        }
+
+        .path-card {
+            padding: 20px;
+            border-radius: 8px;
+            border: 2px solid #eaeaea;
+        }
+
+        .path-card.verified-path {
+            border-color: #0a7146;
+            background: #f0f9f4;
+        }
+
+        .path-card.manual-path {
+            border-color: #b54708;
+            background: #fef6ef;
+        }
+
+        .path-card h4 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .path-card.verified-path h4::before {
+            content: "✅";
+        }
+
+        .path-card.manual-path h4::before {
+            content: "⚠️";
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            color: #666;
+            font-size: 0.9rem;
+            border-top: 1px solid #eaeaea;
+        }
+
+        @media (max-width: 768px) {
+            .content-section {
+                flex-direction: column;
+            }
+            
+            .path-comparison {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <h1>Retailer Onboarding Process Flow</h1>
+                <p class="subtitle">Complete workflow documentation for administrator-led retailer creation with automated verification and manual fallback processes.</p>
+            </div>
+        </header>
+
+        <div class="content-section">
+            <div class="summary-card">
+                <h2>Process Summary</h2>
+                
+                <p>The retailer creation process is an administrative function designed to onboard new retailers into the system. The flow is initiated by an authenticated administrator and can proceed through two primary paths:</p>
+                
+                <div class="path-comparison">
+                    <div class="path-card verified-path">
+                        <h4>Verified Onboarding</h4>
+                        <p>System automatically populates retailer details by validating PAN card against government API. Cross-references PAN with Aadhaar for identity verification.</p>
+                        <ul>
+                            <li>Uses PAN-Aadhaar linking</li>
+                            <li>Auto-fills personal details</li>
+                            <li>Higher security & trust</li>
+                            <li>Fields locked after verification</li>
+                        </ul>
+                    </div>
+                    <div class="path-card manual-path">
+                        <h4>Manual Onboarding</h4>
+                        <p>Fallback path used for insufficient wallet balance, API failure, or unlinked PAN-Aadhaar. Requires admin data entry with validations.</p>
+                        <ul>
+                            <li>Manual data entry</li>
+                            <li>Used when APIs fail</li>
+                            <li>Requires post-verification</li>
+                            <li>All fields remain editable</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <h3>Final Status Overview</h3>
+                <table class="status-table">
+                    <thead>
+                        <tr>
+                            <th>Onboarding Path</th>
+                            <th>Verification Status</th>
+                            <th>Fields Editable?</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Verified</strong></td>
+                            <td><span class="badge verified">Verified</span></td>
+                            <td>Only non-verified fields</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Manual</strong></td>
+                            <td><span class="badge not-verified">Not Verified</span></td>
+                            <td>All fields</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div class="note-box">
+                    <p><strong>Note:</strong> The 'Electronic' agent type is unavailable for D2C (Direct-to-Consumer) retailer flows. Only 'Banking' and 'Travel' options are available.</p>
+                </div>
+            </div>
+            
+            <div class="flow-card">
+                <h2>Process Flow Diagram</h2>
+                <p>The following diagram illustrates the complete retailer onboarding workflow with all decision points, validations, and exception handling:</p>
+                
+                <div class="mermaid">
+flowchart TD
+    %% === STYLING ===
+    classDef startEnd fill:#1e3c72,color:#fff,stroke:#1e3c72,stroke-width:2px
+    classDef process fill:#2a5298,color:#fff,stroke:#2a5298,stroke-width:2px
+    classDef decision fill:#ff6b6b,color:#fff,stroke:#ff6b6b,stroke-width:2px
+    classDef input fill:#4ecdc4,color:#fff,stroke:#4ecdc4,stroke-width:2px
+    classDef manual fill:#ff9f43,color:#fff,stroke:#ff9f43,stroke-width:2px
+    classDef verified fill:#1dd1a1,color:#fff,stroke:#1dd1a1,stroke-width:2px
+    classDef common fill:#a55eea,color:#fff,stroke:#a55eea,stroke-width:2px
+    classDef stop fill:#ff3838,color:#fff,stroke:#ff3838,stroke-width:2px
+
+    %% === INITIATION ===
+    Start([🏁 START Retailer Onboarding]):::startEnd
+    Start --> Login[Admin Login<br>with User ID & Password]:::process
+    Login --> Nav[Navigate to<br>Manage Admin → Create Retailer]:::process
+    Nav --> Agent[Select Agent Type<br>Banking or Travel]:::input
+
+    %% === PAN VALIDATION ===
+    Agent --> PAN[Enter PAN Card Number]:::input
+    PAN --> PAN_Format{Format Check<br>AAAAA1111A}:::decision
+    PAN_Format -->|❌ Invalid| FormatError[Show Format Error]:::stop
+    PAN_Format -->|✅ Valid| PAN_Duplicate{Duplicate Check}:::decision
+    
+    PAN_Duplicate -->|❌ Already Exists| DuplicateError[Show Error:<br>Retailer ABC ID-XXXX exists]:::stop
+    PAN_Duplicate -->|✅ Unique| WalletCheck{Check Admin<br>Wallet Balance}:::decision
+
+    FormatError --> Stop1[🛑 STOP]:::stop
+    DuplicateError --> Stop2[🛑 STOP]:::stop
+
+    %% === MAIN BRANCHING ===
+    WalletCheck -->|❌ Insufficient| Path_B[💰 Manual Flow<br>Insufficient Balance]:::manual
+    WalletCheck -->|✅ Sufficient| API_Check[📡 Call PAN API]:::process
+    
+    API_Check -->|❌ API Down| Path_C[🔧 Manual Flow<br>API Not Working]:::manual
+    API_Check -->|✅ API Working| LinkCheck{PAN-Aadhaar<br>Linked?}:::decision
+
+    %% === VERIFIED FLOW ===
+    LinkCheck -->|✅ Yes| Path_A1[✅ Verified Flow<br>Auto Data Population]:::verified
+    LinkCheck -->|❌ No| Path_A2[⚠️ Manual Fallback<br>PAN Not Linked]:::manual
+
+    %% PATH A1 - VERIFIED FLOW
+    Path_A1 --> AutoFill1[Auto-fill from API<br>Name, DOB, Address]:::verified
+    AutoFill1 --> ManualCheck1{All Fields<br>Populated?}:::decision
+    ManualCheck1 -->|❌ Missing Data| ManualFill1[Admin manually<br>completes missing fields]:::input
+    ManualCheck1 -->|✅ Complete| AadhaarEntry1[Enter Aadhaar Number]:::input
+    ManualFill1 --> AadhaarEntry1
+    
+    AadhaarEntry1 --> AadhaarVal1{Aadhaar Validation}:::decision
+    AadhaarVal1 -->|❌ Invalid| AadhaarError1[Show Validation Error]:::stop
+    AadhaarVal1 -->|✅ Valid| CrossVerify{Cross Verify<br>Last 4 digits match}:::decision
+    
+    CrossVerify -->|✅ Match| To_Common1[➡️ Proceed to Common Steps]:::common
+    CrossVerify -->|❌ No Match| CrossError[Show Mismatch Error]:::stop
+    
+    AadhaarError1 --> Stop3[🛑 STOP]:::stop
+    CrossError --> Stop4[🛑 STOP]:::stop
+
+    %% PATH A2 - MANUAL FALLBACK
+    Path_A2 --> Message[Show Message:<br>PAN not linked with Aadhaar]:::manual
+    Message --> AutoFill2[Auto-fill from PAN API<br>if available]:::manual
+    AutoFill2 --> ManualFill2[Admin manually<br>enters all details]:::input
+    ManualFill2 --> AadhaarEntry2[Enter Aadhaar<br>Format check only]:::input
+    AadhaarEntry2 --> AadhaarVal2{Aadhaar Validation}:::decision
+    AadhaarVal2 -->|❌ Invalid| Stop5[🛑 STOP]:::stop
+    AadhaarVal2 -->|✅ Valid| To_Common2[➡️ Proceed to Common Steps]:::common
+
+    %% PATH B & C - MANUAL FLOWS
+    Path_B --> InsufficientMsg[Show: Insufficient Balance]:::manual
+    Path_C --> APIDownMsg[Show: PAN API Down]:::manual
+    
+    InsufficientMsg --> ManualEntry_B[Manual Entry All Details]:::input
+    APIDownMsg --> ManualEntry_C[Manual Entry All Details]:::input
+    
+    ManualEntry_B --> Val_B{Validation Check}:::decision
+    ManualEntry_C --> Val_C{Validation Check}:::decision
+    
+    Val_B -->|❌ Invalid| Stop6[🛑 STOP]:::stop
+    Val_B -->|✅ Valid| To_Common3[➡️ Proceed to Common Steps]:::common
+    Val_C -->|❌ Invalid| Stop7[🛑 STOP]:::stop
+    Val_C -->|✅ Valid| To_Common4[➡️ Proceed to Common Steps]:::common
+
+    %% === COMMON STEPS ===
+    To_Common1 --> Common
+    To_Common2 --> Common
+    To_Common3 --> Common
+    To_Common4 --> Common
+    
+    subgraph Common [📋 COMMON ONBOARDING STEPS]
+        C1[Contact Details Entry]:::common --> C2{Mobile & Email<br>Validation}:::decision
+        C2 -->|✅ Format Valid| C3{Uniqueness Check}:::decision
+        C3 -->|❌ Duplicate| C4[Show Error:<br>Mobile/Email already registered]:::stop
+        C3 -->|✅ Unique| C5[Bank Details Entry]:::common
+        
+        C5 --> C6[Bank Validations<br>Account, IFSC, Bank Name]:::common
+        C6 --> C7[Create Retailer Record<br>Generate Retailer ABC ID]:::common
+    end
+    
+    C4 --> Stop8[🛑 STOP]:::stop
+    C7 --> Status{Assign Final Status}:::decision
+
+    %% === FINAL STATUS ===
+    Status -->|From Path A1| Verified[✅ STATUS: VERIFIED<br>Green Badge - Non-clickable<br>Auto-filled fields LOCKED]:::verified
+    Status -->|From Path A2/B/C| NotVerified[⚠️ STATUS: NOT VERIFIED<br>Gray Badge - Clickable<br>All fields editable]:::manual
+    
+    Verified --> End1[🎉 Onboarding Complete]:::startEnd
+    NotVerified --> PostVerify[Post-Onboarding<br>Verification Available]:::manual
+    
+    PostVerify --> Click[Admin clicks 'Not Verified' badge]:::manual
+    Click --> VerifyProcess{Run Verification Check}:::decision
+    
+    VerifyProcess -->|✅ PAN-Aadhaar Match| AutoVerify[Auto-Verify:<br>Verification Done]:::verified
+    VerifyProcess -->|❌ PAN-Aadhaar Mismatch| Mismatch[Show: Details not matching<br>Admin can edit & retry]:::manual
+    VerifyProcess -->|🔧 API Down| APIMessage[Show: API Down<br>Try again later]:::manual
+    
+    AutoVerify --> End2[🎉 Process Complete]:::startEnd
+    Mismatch --> End3[🔄 Return to Edit]:::manual
+    APIMessage --> End4[⏸️ Process Paused]:::manual
+                </div>
+                
+                <div class="flow-section">
+                    <h3>Process Flow Explanation</h3>
+                    <p><strong>Step 1 - Initiation:</strong> Admin logs in and navigates to create retailer section, selects agent type (Banking or Travel).</p>
+                    
+                    <p><strong>Step 2 - PAN Validation:</strong> System checks PAN format (5 letters + 4 digits + 1 letter) and ensures no duplicate retailer exists.</p>
+                    
+                    <p><strong>Step 3 - Branching:</strong> Based on wallet balance and API status, the flow splits into verified or manual paths.</p>
+                    
+                    <p><strong>Step 4 - Data Collection:</strong> 
+                        <ul>
+                            <li><strong>Verified Path:</strong> Auto-fills data from PAN-Aadhaar API, validates Aadhaar, cross-verifies identity</li>
+                            <li><strong>Manual Path:</strong> Admin manually enters all required information with format validations</li>
+                        </ul>
+                    </p>
+                    
+                    <p><strong>Step 5 - Common Steps:</strong> Contact details and bank information are collected with strict validations for all paths.</p>
+                    
+                    <p><strong>Step 6 - Completion:</strong> Retailer record is created with appropriate verification status determining future editability.</p>
+                </div>
+
+                <h3>Key Process Characteristics</h3>
+                <ul>
+                    <li><strong>Dual Path Flow:</strong> Automatically branches into Verified or Manual paths based on system checks</li>
+                    <li><strong>Progressive Validation:</strong> Each field validated for format and uniqueness in real-time</li>
+                    <li><strong>Status-Driven Post-Processing:</strong> Verification status determines record editability</li>
+                    <li><strong>Comprehensive Error Handling:</strong> Manages API failures, insufficient funds, and data mismatches</li>
+                </ul>
+            </div>
+        </div>
+        
+        <footer>
+            <p>Retailer Onboarding Process Documentation | System Administration Guide</p>
+        </footer>
+    </div>
+
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            securityLevel: 'loose',
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true,
+                curve: 'basis'
+            }
+        });
+    </script>
+</body>
+</html>
