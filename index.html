@@ -75,6 +75,7 @@
             border-radius: 10px;
             padding: 25px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            position: relative;
         }
 
         h2 {
@@ -144,10 +145,130 @@
             color: #b54708;
         }
 
+        .diagram-container {
+            position: relative;
+            margin: 20px 0;
+            border: 2px solid #eaeaea;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #f8fafc;
+        }
+
         .mermaid {
             text-align: center;
-            margin: 20px 0;
+            padding: 20px;
             overflow-x: auto;
+            transition: transform 0.3s ease;
+        }
+
+        .diagram-controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            gap: 10px;
+            z-index: 100;
+        }
+
+        .control-btn {
+            background: white;
+            border: 2px solid #2a5298;
+            color: #2a5298;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .control-btn:hover {
+            background: #2a5298;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .zoom-controls {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            display: flex;
+            gap: 5px;
+            z-index: 100;
+        }
+
+        .zoom-btn {
+            background: white;
+            border: 2px solid #1e3c72;
+            color: #1e3c72;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .zoom-btn:hover {
+            background: #1e3c72;
+            color: white;
+            transform: scale(1.1);
+        }
+
+        /* Fullscreen styles */
+        .fullscreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: white;
+            z-index: 9999;
+            padding: 20px;
+            overflow: auto;
+        }
+
+        .fullscreen .diagram-container {
+            height: calc(100vh - 40px);
+            border: none;
+            border-radius: 0;
+        }
+
+        .fullscreen .mermaid {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transform: scale(1.2);
+        }
+
+        .fullscreen .diagram-controls {
+            top: 20px;
+            right: 20px;
+        }
+
+        .fullscreen .zoom-controls {
+            bottom: 20px;
+            right: 20px;
+        }
+
+        .close-fullscreen {
+            background: #ff6b6b;
+            border-color: #ff6b6b;
+            color: white;
+        }
+
+        .close-fullscreen:hover {
+            background: #ff3838;
+            border-color: #ff3838;
         }
 
         .note-box {
@@ -233,6 +354,28 @@
             content: "⚠️";
         }
 
+        .validation-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 0.9rem;
+        }
+
+        .validation-table th, .validation-table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .validation-table th {
+            background-color: #2a5298;
+            color: white;
+        }
+
+        .validation-table tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
         footer {
             text-align: center;
             margin-top: 40px;
@@ -253,6 +396,17 @@
             
             h1 {
                 font-size: 2rem;
+            }
+            
+            .control-btn {
+                padding: 6px 10px;
+                font-size: 0.9rem;
+            }
+            
+            .zoom-btn {
+                width: 35px;
+                height: 35px;
+                font-size: 16px;
             }
         }
     </style>
@@ -295,6 +449,32 @@
                     </div>
                 </div>
                 
+                <h3>Document Validation Rules</h3>
+                <table class="validation-table">
+                    <thead>
+                        <tr>
+                            <th>Document</th>
+                            <th>Format Validation</th>
+                            <th>Duplicate Check</th>
+                            <th>Error Message</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>PAN Card</strong></td>
+                            <td>AAAAA1111A (5 letters + 4 digits + 1 letter)</td>
+                            <td>Check existing retailers</td>
+                            <td>"Retailer ABC ID-XXXX exists with this PAN"</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Aadhaar Card</strong></td>
+                            <td>12 digits, not starting with 0/1</td>
+                            <td>Check existing retailers</td>
+                            <td>"Retailer ABC ID-XXXX exists with this Aadhaar"</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
                 <h3>Final Status Overview</h3>
                 <table class="status-table">
                     <thead>
@@ -327,7 +507,20 @@
                 <h2>Process Flow Diagram</h2>
                 <p>The following diagram illustrates the complete retailer onboarding workflow with all decision points, validations, and exception handling:</p>
                 
-                <div class="mermaid">
+                <div class="diagram-container" id="diagramContainer">
+                    <div class="diagram-controls">
+                        <button class="control-btn" onclick="toggleFullscreen()">
+                            <span>⛶</span> Full Screen
+                        </button>
+                    </div>
+                    
+                    <div class="zoom-controls">
+                        <button class="zoom-btn" onclick="zoomOut()">-</button>
+                        <button class="zoom-btn" onclick="resetZoom()">⟳</button>
+                        <button class="zoom-btn" onclick="zoomIn()">+</button>
+                    </div>
+                    
+                    <div class="mermaid" id="mainDiagram">
 flowchart TD
     %% === STYLING ===
     classDef startEnd fill:#1e3c72,color:#fff,stroke:#1e3c72,stroke-width:2px
@@ -338,6 +531,7 @@ flowchart TD
     classDef verified fill:#1dd1a1,color:#fff,stroke:#1dd1a1,stroke-width:2px
     classDef common fill:#a55eea,color:#fff,stroke:#a55eea,stroke-width:2px
     classDef stop fill:#ff3838,color:#fff,stroke:#ff3838,stroke-width:2px
+    classDef aadhaarCheck fill:#54a0ff,color:#fff,stroke:#54a0ff,stroke-width:2px
 
     %% === INITIATION ===
     Start([🏁 START Retailer Onboarding]):::startEnd
@@ -375,24 +569,34 @@ flowchart TD
     ManualCheck1 -->|✅ Complete| AadhaarEntry1[Enter Aadhaar Number]:::input
     ManualFill1 --> AadhaarEntry1
     
-    AadhaarEntry1 --> AadhaarVal1{Aadhaar Validation}:::decision
-    AadhaarVal1 -->|❌ Invalid| AadhaarError1[Show Validation Error]:::stop
-    AadhaarVal1 -->|✅ Valid| CrossVerify{Cross Verify<br>Last 4 digits match}:::decision
+    AadhaarEntry1 --> AadhaarFormat1{Aadhaar Format Check<br>12 digits, not starting 0/1}:::decision
+    AadhaarFormat1 -->|❌ Invalid| AadhaarFormatError1[Show Format Error]:::stop
+    AadhaarFormat1 -->|✅ Valid| AadhaarDuplicate1{Aadhaar Duplicate Check}:::aadhaarCheck
+    
+    AadhaarDuplicate1 -->|❌ Already Exists| AadhaarDuplicateError1[Show Error:<br>Retailer ABC ID-XXXX exists]:::stop
+    AadhaarDuplicate1 -->|✅ Unique| CrossVerify{Cross Verify<br>Last 4 digits match}:::decision
     
     CrossVerify -->|✅ Match| To_Common1[➡️ Proceed to Common Steps]:::common
     CrossVerify -->|❌ No Match| CrossError[Show Mismatch Error]:::stop
     
-    AadhaarError1 --> Stop3[🛑 STOP]:::stop
-    CrossError --> Stop4[🛑 STOP]:::stop
+    AadhaarFormatError1 --> Stop3[🛑 STOP]:::stop
+    AadhaarDuplicateError1 --> Stop4[🛑 STOP]:::stop
+    CrossError --> Stop5[🛑 STOP]:::stop
 
     %% PATH A2 - MANUAL FALLBACK
     Path_A2 --> Message[Show Message:<br>PAN not linked with Aadhaar]:::manual
     Message --> AutoFill2[Auto-fill from PAN API<br>if available]:::manual
     AutoFill2 --> ManualFill2[Admin manually<br>enters all details]:::input
-    ManualFill2 --> AadhaarEntry2[Enter Aadhaar<br>Format check only]:::input
-    AadhaarEntry2 --> AadhaarVal2{Aadhaar Validation}:::decision
-    AadhaarVal2 -->|❌ Invalid| Stop5[🛑 STOP]:::stop
-    AadhaarVal2 -->|✅ Valid| To_Common2[➡️ Proceed to Common Steps]:::common
+    ManualFill2 --> AadhaarEntry2[Enter Aadhaar Number]:::input
+    AadhaarEntry2 --> AadhaarFormat2{Aadhaar Format Check<br>12 digits, not starting 0/1}:::decision
+    AadhaarFormat2 -->|❌ Invalid| AadhaarFormatError2[Show Format Error]:::stop
+    AadhaarFormat2 -->|✅ Valid| AadhaarDuplicate2{Aadhaar Duplicate Check}:::aadhaarCheck
+    
+    AadhaarDuplicate2 -->|❌ Already Exists| AadhaarDuplicateError2[Show Error:<br>Retailer ABC ID-XXXX exists]:::stop
+    AadhaarDuplicate2 -->|✅ Unique| To_Common2[➡️ Proceed to Common Steps]:::common
+    
+    AadhaarFormatError2 --> Stop6[🛑 STOP]:::stop
+    AadhaarDuplicateError2 --> Stop7[🛑 STOP]:::stop
 
     %% PATH B & C - MANUAL FLOWS
     Path_B --> InsufficientMsg[Show: Insufficient Balance]:::manual
@@ -401,13 +605,18 @@ flowchart TD
     InsufficientMsg --> ManualEntry_B[Manual Entry All Details]:::input
     APIDownMsg --> ManualEntry_C[Manual Entry All Details]:::input
     
-    ManualEntry_B --> Val_B{Validation Check}:::decision
-    ManualEntry_C --> Val_C{Validation Check}:::decision
+    ManualEntry_B --> PAN_Val_B{PAN Validation}:::decision
+    ManualEntry_C --> PAN_Val_C{PAN Validation}:::decision
     
-    Val_B -->|❌ Invalid| Stop6[🛑 STOP]:::stop
-    Val_B -->|✅ Valid| To_Common3[➡️ Proceed to Common Steps]:::common
-    Val_C -->|❌ Invalid| Stop7[🛑 STOP]:::stop
-    Val_C -->|✅ Valid| To_Common4[➡️ Proceed to Common Steps]:::common
+    PAN_Val_B -->|❌ Invalid| Stop8[🛑 STOP]:::stop
+    PAN_Val_B -->|✅ Valid| Aadhaar_Val_B{Aadhaar Validation}:::decision
+    PAN_Val_C -->|❌ Invalid| Stop9[🛑 STOP]:::stop
+    PAN_Val_C -->|✅ Valid| Aadhaar_Val_C{Aadhaar Validation}:::decision
+    
+    Aadhaar_Val_B -->|❌ Invalid| Stop10[🛑 STOP]:::stop
+    Aadhaar_Val_B -->|✅ Valid| To_Common3[➡️ Proceed to Common Steps]:::common
+    Aadhaar_Val_C -->|❌ Invalid| Stop11[🛑 STOP]:::stop
+    Aadhaar_Val_C -->|✅ Valid| To_Common4[➡️ Proceed to Common Steps]:::common
 
     %% === COMMON STEPS ===
     To_Common1 --> Common
@@ -425,7 +634,7 @@ flowchart TD
         C6 --> C7[Create Retailer Record<br>Generate Retailer ABC ID]:::common
     end
     
-    C4 --> Stop8[🛑 STOP]:::stop
+    C4 --> Stop12[🛑 STOP]:::stop
     C7 --> Status{Assign Final Status}:::decision
 
     %% === FINAL STATUS ===
@@ -445,31 +654,37 @@ flowchart TD
     AutoVerify --> End2[🎉 Process Complete]:::startEnd
     Mismatch --> End3[🔄 Return to Edit]:::manual
     APIMessage --> End4[⏸️ Process Paused]:::manual
+                    </div>
                 </div>
                 
                 <div class="flow-section">
-                    <h3>Process Flow Explanation</h3>
-                    <p><strong>Step 1 - Initiation:</strong> Admin logs in and navigates to create retailer section, selects agent type (Banking or Travel).</p>
+                    <h3>Diagram Controls</h3>
+                    <p>Use the controls above the diagram to:</p>
+                    <ul>
+                        <li><strong>Full Screen:</strong> Expand the diagram to full screen for better visibility</li>
+                        <li><strong>Zoom In/Out:</strong> Use + and - buttons to adjust the zoom level</li>
+                        <li><strong>Reset Zoom:</strong> Click the reset button to return to default zoom</li>
+                    </ul>
+                </div>
+
+                <div class="flow-section">
+                    <h3>Enhanced Aadhaar Validation Process</h3>
+                    <p><strong>New Aadhaar Duplicate Check:</strong> Similar to PAN card validation, the system now performs comprehensive Aadhaar validation:</p>
                     
-                    <p><strong>Step 2 - PAN Validation:</strong> System checks PAN format (5 letters + 4 digits + 1 letter) and ensures no duplicate retailer exists.</p>
+                    <ul>
+                        <li><strong>Format Validation:</strong> 12 digits, numeric only, cannot start with 0 or 1</li>
+                        <li><strong>Duplicate Check:</strong> System-wide check for existing retailers with the same Aadhaar number</li>
+                        <li><strong>Error Handling:</strong> Clear error message: "Retailer ABC ID-XXXX exists with this Aadhaar"</li>
+                        <li><strong>Cross-Verification:</strong> In verified flow, matches last 4 digits with PAN API session data</li>
+                    </ul>
                     
-                    <p><strong>Step 3 - Branching:</strong> Based on wallet balance and API status, the flow splits into verified or manual paths.</p>
-                    
-                    <p><strong>Step 4 - Data Collection:</strong> 
-                        <ul>
-                            <li><strong>Verified Path:</strong> Auto-fills data from PAN-Aadhaar API, validates Aadhaar, cross-verifies identity</li>
-                            <li><strong>Manual Path:</strong> Admin manually enters all required information with format validations</li>
-                        </ul>
-                    </p>
-                    
-                    <p><strong>Step 5 - Common Steps:</strong> Contact details and bank information are collected with strict validations for all paths.</p>
-                    
-                    <p><strong>Step 6 - Completion:</strong> Retailer record is created with appropriate verification status determining future editability.</p>
+                    <p>This enhancement ensures no duplicate retailers can be created using the same Aadhaar number across all onboarding paths.</p>
                 </div>
 
                 <h3>Key Process Characteristics</h3>
                 <ul>
                     <li><strong>Dual Path Flow:</strong> Automatically branches into Verified or Manual paths based on system checks</li>
+                    <li><strong>Enhanced Document Validation:</strong> Both PAN and Aadhaar now have format + duplicate checks</li>
                     <li><strong>Progressive Validation:</strong> Each field validated for format and uniqueness in real-time</li>
                     <li><strong>Status-Driven Post-Processing:</strong> Verification status determines record editability</li>
                     <li><strong>Comprehensive Error Handling:</strong> Manages API failures, insufficient funds, and data mismatches</li>
@@ -478,11 +693,12 @@ flowchart TD
         </div>
         
         <footer>
-            <p>Retailer Onboarding Process Documentation | System Administration Guide</p>
+            <p>Retailer Onboarding Process Documentation | System Administration Guide | Updated with Enhanced Aadhaar Validation</p>
         </footer>
     </div>
 
     <script>
+        // Initialize Mermaid
         mermaid.initialize({
             startOnLoad: true,
             theme: 'default',
@@ -491,6 +707,126 @@ flowchart TD
                 useMaxWidth: true,
                 htmlLabels: true,
                 curve: 'basis'
+            }
+        });
+
+        // Zoom functionality
+        let currentScale = 1;
+        const diagram = document.getElementById('mainDiagram');
+        const diagramContainer = document.getElementById('diagramContainer');
+
+        function zoomIn() {
+            if (currentScale < 2) {
+                currentScale += 0.1;
+                updateZoom();
+            }
+        }
+
+        function zoomOut() {
+            if (currentScale > 0.5) {
+                currentScale -= 0.1;
+                updateZoom();
+            }
+        }
+
+        function resetZoom() {
+            currentScale = 1;
+            updateZoom();
+        }
+
+        function updateZoom() {
+            diagram.style.transform = `scale(${currentScale})`;
+            diagram.style.transformOrigin = 'center center';
+        }
+
+        // Fullscreen functionality
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                enterFullscreen();
+            } else {
+                exitFullscreen();
+            }
+        }
+
+        function enterFullscreen() {
+            const container = diagramContainer;
+            
+            if (container.requestFullscreen) {
+                container.requestFullscreen();
+            } else if (container.webkitRequestFullscreen) {
+                container.webkitRequestFullscreen();
+            } else if (container.msRequestFullscreen) {
+                container.msRequestFullscreen();
+            }
+            
+            container.classList.add('fullscreen');
+            
+            // Update button
+            const fullscreenBtn = document.querySelector('.control-btn');
+            fullscreenBtn.innerHTML = '<span>✕</span> Exit Fullscreen';
+            fullscreenBtn.classList.add('close-fullscreen');
+            fullscreenBtn.onclick = exitFullscreen;
+            
+            // Reset and slightly increase zoom for fullscreen
+            currentScale = 1.2;
+            updateZoom();
+        }
+
+        function exitFullscreen() {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            } else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen();
+            } else if (document.msExitFullscreen) {
+                document.msExitFullscreen();
+            }
+            
+            diagramContainer.classList.remove('fullscreen');
+            
+            // Update button
+            const fullscreenBtn = document.querySelector('.control-btn');
+            fullscreenBtn.innerHTML = '<span>⛶</span> Full Screen';
+            fullscreenBtn.classList.remove('close-fullscreen');
+            fullscreenBtn.onclick = toggleFullscreen;
+            
+            // Reset zoom
+            resetZoom();
+        }
+
+        // Handle fullscreen change events
+        document.addEventListener('fullscreenchange', handleFullscreenChange);
+        document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+        document.addEventListener('msfullscreenchange', handleFullscreenChange);
+
+        function handleFullscreenChange() {
+            if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) {
+                exitFullscreen();
+            }
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey) {
+                switch(e.key) {
+                    case '=':
+                    case '+':
+                        e.preventDefault();
+                        zoomIn();
+                        break;
+                    case '-':
+                        e.preventDefault();
+                        zoomOut();
+                        break;
+                    case '0':
+                        e.preventDefault();
+                        resetZoom();
+                        break;
+                }
+            }
+            
+            // Escape key to exit fullscreen
+            if (e.key === 'Escape' && document.fullscreenElement) {
+                exitFullscreen();
             }
         });
     </script>
